@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 
-const API_URL = 'https://ai-calculator-ecru.vercel.app/'; // Update this to match your backend URL
+const API_URL = 'https://ai-calculator-ecru.vercel.app'; // Update this to match your backend URL
 
 const COLORS = [
   '#000000', '#FFFFFF', '#FF3B30', '#FF2D55', 
