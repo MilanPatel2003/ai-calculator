@@ -1,6 +1,6 @@
 import express from 'express';
-import { analyzeImage } from '../utils/imageAnalyzer';
 import { ImageData } from '../types';
+import { analyzeImage } from '../utils/imageAnalyzer';
 
 const router = express.Router();
 

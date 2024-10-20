@@ -4,14 +4,50 @@ import axios, { AxiosError } from 'axios';
 const API_URL = 'http://localhost:3000'; // Update this to match your backend URL
 
 const COLORS = [
-  'rgb(0, 0, 0)', 'rgb(255, 255, 255)', 'rgb(255, 59, 48)', 'rgb(255, 45, 85)', 
-  'rgb(175, 82, 222)', 'rgb(88, 86, 214)', 'rgb(0, 122, 255)', 'rgb(52, 199, 89)', 
-  'rgb(255, 204, 0)', 'rgb(255, 149, 0)', 'rgb(142, 142, 147)'
+  '#000000', '#FFFFFF', '#FF3B30', '#FF2D55', 
+  '#AF52DE', '#5856D6', '#007AFF', '#34C759', 
+  '#FFCC00', '#FF9500', '#8E8E93'
 ];
 
-const TOOLS = ['pen', 'eraser', 'lasso'] as const;
+const TOOLS = ['pen', 'eraser'] as const;
 type Tool = typeof TOOLS[number];
 
+// Add these icon components
+const PenIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+    <path d="M2 2l7.586 7.586"></path>
+    <circle cx="11" cy="11" r="2"></circle>
+  </svg>
+);
+
+const EraserIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 20H7L3 16C2.5 15.5 2.5 14.5 3 14L13 4L20 11L11 20"></path>
+    <path d="M6 11L13 18"></path>
+  </svg>
+);
+
+const LightModeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+);
+
+const DarkModeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+);
 
 const resizeImage = (base64Str: string, maxWidth = 1024, maxHeight = 1024): Promise<string> => {
   return new Promise((resolve) => {
@@ -48,20 +84,22 @@ export default function App() {
   const [color, setColor] = useState<string>(COLORS[0]);
   const [tool, setTool] = useState<Tool>('pen');
   const [lineWidth, setLineWidth] = useState<number>(2);
-  const [result, setResult] = useState<string>('');
+  const [result, setResult] = useState<string | { user_friendly_output: string }>('');
+  const [darkMode, setDarkMode] = useState<boolean>(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
+    const resizeCanvas = () => {
+      if (canvas) {
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 100; // Subtracting toolbar height
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.height = window.innerHeight - (window.innerWidth < 640 ? 168 : 112);
       }
-    }
-  }, []);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, [darkMode]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
@@ -87,7 +125,7 @@ export default function App() {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        ctx.strokeStyle = tool === 'eraser' ? 'white' : color;
+        ctx.strokeStyle = tool === 'eraser' ? (darkMode ? 'black' : 'white') : color;
         ctx.lineWidth = lineWidth;
         ctx.lineCap = 'round';
         ctx.lineTo(x, y);
@@ -103,11 +141,16 @@ export default function App() {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = darkMode ? 'black' : 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
     setResult('');
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    resetCanvas();
   };
 
   const calculateResult = async () => {
@@ -123,7 +166,7 @@ export default function App() {
         if (typeof response.data.result === 'string') {
           setResult(response.data.result);
         } else {
-          setResult(JSON.stringify(response.data.result));
+          setResult(response.data.result);
         }
       } catch (error) {
         console.error('Error analyzing image:', error);
@@ -139,25 +182,35 @@ export default function App() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-md p-2 flex justify-between items-center">
+    <div className={`h-screen w-screen overflow-hidden ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col`}>
+      <header className={`${darkMode ? 'bg-blue-800' : 'bg-blue-600'} text-white p-2 sm:p-4 text-center`}>
+        <h1 className="text-xl sm:text-2xl font-bold">AI-POWERED MATH NOTES</h1>
+      </header>
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-200'} shadow-md p-2 sm:p-4 flex flex-wrap justify-between items-center gap-2`}>
         <div className="flex space-x-2">
           {TOOLS.map((t) => (
             <button
               key={t}
-              className={`p-2 rounded ${tool === t ? 'bg-gray-200' : ''}`}
+              className={`p-2 rounded ${
+                tool === t 
+                  ? 'bg-blue-500 text-white' 
+                  : `${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-300 text-gray-700'} hover:bg-gray-400`
+              }`}
               onClick={() => setTool(t)}
+              title={t.charAt(0).toUpperCase() + t.slice(1)}
             >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {t === 'pen' ? <PenIcon /> : <EraserIcon />}
             </button>
           ))}
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap space-x-1 sm:space-x-2">
           {COLORS.map((c) => (
             <button
               key={c}
-              className={`w-6 h-6 rounded-full ${c === 'rgb(255, 255, 255)' ? 'border border-gray-300' : ''}`}
-              style={{ backgroundColor: c, border: color === c ? '2px solid black' : 'none' }}
+              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full ${
+                c === '#FFFFFF' ? 'border border-gray-300' : ''
+              } ${color === c ? 'ring-2 ring-blue-500' : ''}`}
+              style={{ backgroundColor: c }}
               onClick={() => setColor(c)}
             />
           ))}
@@ -169,29 +222,45 @@ export default function App() {
             max="20"
             value={lineWidth}
             onChange={(e) => setLineWidth(parseInt(e.target.value))}
-            className="w-32"
+            className="w-24 sm:w-32"
           />
-          <span>{lineWidth}px</span>
+          <span className="text-sm sm:text-base">{lineWidth}px</span>
         </div>
         <div className="flex space-x-2">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={resetCanvas}>Reset</button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={calculateResult}>Calculate</button>
+          <button className="bg-red-500 text-white px-2 py-1 sm:px-4 sm:py-2 rounded text-sm sm:text-base" onClick={resetCanvas}>Reset</button>
+          <button className="bg-green-500 text-white px-2 py-1 sm:px-4 sm:py-2 rounded text-sm sm:text-base" onClick={calculateResult}>Calculate</button>
+          <button className="p-2 rounded" onClick={toggleDarkMode}>
+            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </button>
         </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        className="absolute top-16 left-0 w-full h-[calc(100vh-4rem)]"
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseOut={stopDrawing}
-      />
-      {result && (
-        <div className="absolute top-20 left-4 bg-white p-2 rounded shadow-md">
-        
-          {result}
-        </div>
-      )}
+      <div className="relative flex-grow">
+        <canvas
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseOut={stopDrawing}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            startDrawing(e.touches[0] as unknown as React.MouseEvent<HTMLCanvasElement>);
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            draw(e.touches[0] as unknown as React.MouseEvent<HTMLCanvasElement>);
+          }}
+          onTouchEnd={stopDrawing}
+        />
+        {result && (
+          <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
+            <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Result:</h2>
+            <p className="text-base sm:text-lg">
+              {typeof result === 'string' ? result : result.user_friendly_output}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
