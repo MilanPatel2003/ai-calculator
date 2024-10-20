@@ -222,7 +222,7 @@ export default function App() {
                 🧮 UNLEASH YOUR MATH POTENTIAL • 📐 DRAW EQUATIONS, GRAPHS, OR GEOMETRY • 
                 🔢 TRY ALGEBRA, CALCULUS, OR STATISTICS • 📊 SKETCH FRACTIONS, MATRICES, OR FUNCTIONS • 
                 🖊️ WRITE • ✏️ DRAW • 🧽 ERASE • 🔄 RESET • 🌓 TOGGLE MODES • 🚀 CALCULATE •
-                👨‍💻 CURIOUS ABOUT THE DEVELOPER? <a href="https://milanpatel.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">VISIT MILAN'S PORTFOLIO</a>
+                👨‍💻 CURIOUS ABOUT THE CREATOR? <a href="https://milanpatel.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">EXPLORE DEVELOPER'S PORTFOLIO</a>
               </span>
             </div>
           </div>
