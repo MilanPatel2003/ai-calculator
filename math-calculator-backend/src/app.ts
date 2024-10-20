@@ -11,7 +11,7 @@ import {
 
 const app = express();
 
-const frontendUrl = process.env.FRONTEND_URL || 'https://ai-calculator-frontend-plum.vercel.app';
+const frontendUrl = process.env.FRONTEND_URL || 'https://ai-calculator-frontend-plum.vercel.app/';
 app.use(cors({
   origin: frontendUrl,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
