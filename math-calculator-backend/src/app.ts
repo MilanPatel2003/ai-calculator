@@ -8,11 +8,16 @@ import {
   GoogleGenerativeAI,
   GoogleGenerativeAIError,
 } from "@google/generative-ai";
-import { PORT } from "./config/constants";
 
 const app = express();
 
-app.use(cors());
+const frontendUrl = process.env.FRONTEND_URL || 'https://ai-calculator-frontend-plum.vercel.app';
+app.use(cors({
+  origin: frontendUrl,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" })); 
 
@@ -227,6 +232,9 @@ app.post("/analyze", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
+
+export default app;
