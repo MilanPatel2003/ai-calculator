@@ -221,7 +221,8 @@ export default function App() {
               <span className="animate-gradient bg-gradient-text bg-clip-text text-transparent bg-200% bg-left">
                 🧮 UNLEASH YOUR MATH POTENTIAL • 📐 DRAW EQUATIONS, GRAPHS, OR GEOMETRY • 
                 🔢 TRY ALGEBRA, CALCULUS, OR STATISTICS • 📊 SKETCH FRACTIONS, MATRICES, OR FUNCTIONS • 
-                🖊️ WRITE • ✏️ DRAW • 🧽 ERASE • 🔄 RESET • 🌓 TOGGLE MODES • 🚀 CALCULATE
+                🖊️ WRITE • ✏️ DRAW • 🧽 ERASE • 🔄 RESET • 🌓 TOGGLE MODES • 🚀 CALCULATE •
+                👨‍💻 CURIOUS ABOUT THE DEVELOPER? <a href="https://milanpatel.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">VISIT MILAN'S PORTFOLIO</a>
               </span>
             </div>
           </div>
