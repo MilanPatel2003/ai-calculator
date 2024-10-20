@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 
+
+// Add this new import for the logo
+import logo from '/logo.png';
+
 const API_URL = 'https://ai-calculator-ecru.vercel.app'; // Remove the trailing slash
+
 
 const COLORS = [
   '#000000', '#FFFFFF', '#FF3B30', '#FF2D55', 
@@ -206,8 +211,21 @@ export default function App() {
 
   return (
     <div className={`h-screen w-screen overflow-hidden ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col`}>
-      <header className={`${darkMode ? 'bg-blue-800' : 'bg-blue-600'} text-white p-2 sm:p-4 text-center`}>
-        <h1 className="text-xl sm:text-2xl font-bold">AI-POWERED MATH NOTES</h1>
+      <header className={`${darkMode ? 'bg-gray-900' : 'bg-gray-100'} text-white`}>
+        <div className="relative overflow-hidden whitespace-nowrap py-3 bg-opacity-90 backdrop-blur-sm">
+          <div className="animate-marquee inline-block">
+            <div className="inline-flex items-center space-x-4 text-sm font-semibold tracking-wide">
+              <img src={logo} alt="LogicLedger Logo" className="w-6 h-6" />
+              <span className={`${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>LOGICLEDGER</span>
+              <span className="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-teal-400"></span>
+              <span className="animate-gradient bg-gradient-text bg-clip-text text-transparent bg-200% bg-left">
+                🧮 UNLEASH YOUR MATH POTENTIAL • 📐 DRAW EQUATIONS, GRAPHS, OR GEOMETRY • 
+                🔢 TRY ALGEBRA, CALCULUS, OR STATISTICS • 📊 SKETCH FRACTIONS, MATRICES, OR FUNCTIONS • 
+                🖊️ WRITE • ✏️ DRAW • 🧽 ERASE • 🔄 RESET • 🌓 TOGGLE MODES • 🚀 CALCULATE
+              </span>
+            </div>
+          </div>
+        </div>
       </header>
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-200'} shadow-md p-2 sm:p-4 flex flex-wrap justify-between items-center gap-2`}>
         <div className="flex space-x-2">
