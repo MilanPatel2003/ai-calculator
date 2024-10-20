@@ -89,7 +89,7 @@ export default function App() {
   const [color, setColor] = useState<string>(COLORS[0]);
   const [tool, setTool] = useState<Tool>('pen');
   const [lineWidth, setLineWidth] = useState<number>(2);
-  const [result, setResult] = useState<string | { user_friendly_output: string }>('');
+  const [result, setResult] = useState('');
   const [darkMode, setDarkMode] = useState<boolean>(true);
 
   useEffect(() => {
@@ -292,7 +292,7 @@ export default function App() {
           <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
             <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Result:</h2>
             <p className="text-base sm:text-lg">
-              {typeof result === 'string' ? result : result.user_friendly_output}
+              {result}
             </p>
           </div>
         )}
