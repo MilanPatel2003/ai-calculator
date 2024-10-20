@@ -98,7 +98,14 @@ export default function App() {
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    return () => window.removeEventListener('resize', resizeCanvas);
+
+    // Prevent default touch behavior
+    document.body.style.overscrollBehavior = 'none';
+    
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      document.body.style.overscrollBehavior = 'auto';
+    };
   }, [darkMode]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -180,6 +187,23 @@ export default function App() {
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    startDrawing(touch as unknown as React.MouseEvent<HTMLCanvasElement>);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    draw(touch as unknown as React.MouseEvent<HTMLCanvasElement>);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    stopDrawing();
+  };
+
   return (
     <div className={`h-screen w-screen overflow-hidden ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col`}>
       <header className={`${darkMode ? 'bg-blue-800' : 'bg-blue-600'} text-white p-2 sm:p-4 text-center`}>
@@ -236,20 +260,14 @@ export default function App() {
       <div className="relative flex-grow">
         <canvas
           ref={canvasRef}
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute top-0 left-0 w-full h-full touch-none"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
           onMouseOut={stopDrawing}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            startDrawing(e.touches[0] as unknown as React.MouseEvent<HTMLCanvasElement>);
-          }}
-          onTouchMove={(e) => {
-            e.preventDefault();
-            draw(e.touches[0] as unknown as React.MouseEvent<HTMLCanvasElement>);
-          }}
-          onTouchEnd={stopDrawing}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         />
         {result && (
           <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
