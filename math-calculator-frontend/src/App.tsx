@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 
 // Add this new import for the logo
@@ -83,31 +83,13 @@ const resizeImage = (base64Str: string, maxWidth = 1024, maxHeight = 1024): Prom
   })
 }
 
-// Add these type definitions
-type Solution = {
-  variable: string;
-  value: number | string;
-};
-
-type Assignment = {
-  variable: string;
-  value: number | string;
-};
-
-type Result = {
-  type: 'simple_expression' | 'equation' | 'assignment' | 'graphical' | 'abstract' | 'error';
-  solution?: Solution[];
-  assignments?: Assignment[];
-  [key: string]: any;
-};
-
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [color, setColor] = useState<string>(COLORS[0]);
   const [tool, setTool] = useState<Tool>('pen');
   const [lineWidth, setLineWidth] = useState<number>(2);
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<string | { user_friendly_output: string }>('');
   const [darkMode, setDarkMode] = useState<boolean>(true);
 
   useEffect(() => {
@@ -175,7 +157,7 @@ export default function App() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
-    setResult(null);
+    setResult('');
   };
 
   const toggleDarkMode = () => {
@@ -192,13 +174,20 @@ export default function App() {
         const base64Data = imageData.split(',')[1];
         
         const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });        
-        setResult(response.data.result);
+        if (typeof response.data.result === 'string') {
+          setResult(response.data.result);
+        } else {
+          setResult(response.data.result);
+        }
       } catch (error) {
         console.error('Error analyzing image:', error);
-        setResult({
-          type: 'error',
-          error: error instanceof Error ? error.message : 'An unknown error occurred',
-        });
+        if (error instanceof AxiosError) {
+          setResult(`Error analyzing image: ${error.response?.data?.error || error.message}`);
+        } else if (error instanceof Error) {
+          setResult(`Error analyzing image: ${error.message}`);
+        } else {
+          setResult('An unknown error occurred');
+        }
       }
     }
   };
@@ -218,56 +207,6 @@ export default function App() {
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     stopDrawing();
-  };
-
-  const renderResult = () => {
-    if (!result) return null;
-
-    switch (result.type) {
-      case 'simple_expression':
-        return (
-          <>
-            <p>Expression: {result.expression}</p>
-            <p>Result: {result.result}</p>
-            <p>Explanation: {result.explanation}</p>
-          </>
-        );
-      case 'equation':
-        return (
-          <>
-            <p>Equation: {result.equation}</p>
-            <p>Solution: {result.solution?.map((sol: Solution) => `${sol.variable} = ${sol.value}`).join(', ')}</p>
-            <p>Explanation: {result.explanation}</p>
-          </>
-        );
-      case 'assignment':
-        return (
-          <>
-            <p>Assignments: {result.assignments?.map((ass: Assignment) => `${ass.variable} = ${ass.value}`).join(', ')}</p>
-            <p>Explanation: {result.explanation}</p>
-          </>
-        );
-      case 'graphical':
-        return (
-          <>
-            <p>Description: {result.description}</p>
-            <p>Result: {JSON.stringify(result.result)}</p>
-            <p>Explanation: {result.explanation}</p>
-          </>
-        );
-      case 'abstract':
-        return (
-          <>
-            <p>Description: {result.description}</p>
-            <p>Interpretation: {result.interpretation}</p>
-            <p>Explanation: {result.explanation}</p>
-          </>
-        );
-      case 'error':
-        return <p>Error: {result.error}</p>;
-      default:
-        return <p>Unknown result type</p>;
-    }
   };
 
   return (
@@ -352,7 +291,9 @@ export default function App() {
         {result && (
           <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
             <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Result:</h2>
-            {renderResult()}
+            <p className="text-base sm:text-lg">
+              {typeof result === 'string' ? result : result.user_friendly_output}
+            </p>
           </div>
         )}
       </div>
