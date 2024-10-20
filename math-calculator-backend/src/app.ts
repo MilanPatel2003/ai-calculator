@@ -8,7 +8,6 @@ import {
   GoogleGenerativeAI,
   GoogleGenerativeAIError,
 } from "@google/generative-ai";
-import { PORT } from "./config/constants";
 
 const app = express();
 
@@ -227,6 +226,7 @@ app.post("/analyze", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
