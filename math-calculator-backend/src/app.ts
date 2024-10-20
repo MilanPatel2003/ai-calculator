@@ -4,7 +4,6 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import calculatorRouter from "./routes/calculator";
 import {
   GoogleGenerativeAI,
   GoogleGenerativeAIError,
@@ -15,9 +14,7 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
-
-app.use("/calculate", calculatorRouter);
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" })); 
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running" });
@@ -216,12 +213,10 @@ app.post("/analyze", async (req, res) => {
 
     if (error instanceof GoogleGenerativeAIError) {
       console.error("Gemini API Error:", error.message);
-      res
-        .status(500)
-        .json({
-          error: "Error processing image with Gemini API",
-          details: error.message,
-        });
+      res.status(500).json({
+        error: "Error processing image with Gemini API",
+        details: error.message,
+      });
     } else if (error instanceof Error) {
       res
         .status(500)
