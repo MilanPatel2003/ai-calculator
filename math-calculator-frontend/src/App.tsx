@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 
-const API_URL = 'https://ai-calculator-ecru.vercel.app/'; // Update this to match your backend URL
+const API_URL = 'https://ai-calculator-ecru.vercel.app'; // Remove the trailing slash
 
 const COLORS = [
   '#000000', '#FFFFFF', '#FF3B30', '#FF2D55', 
@@ -161,8 +161,7 @@ export default function App() {
         imageData = await resizeImage(imageData);
         const base64Data = imageData.split(',')[1];
         
-        const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });
-        
+        const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });        
         if (typeof response.data.result === 'string') {
           setResult(response.data.result);
         } else {
