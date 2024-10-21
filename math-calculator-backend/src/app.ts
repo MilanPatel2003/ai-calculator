@@ -11,9 +11,21 @@ import {
 
 const app = express();
 
-const frontendUrl = process.env.FRONTEND_URL || 'https://ai-calculator-frontend-plum.vercel.app';
+const allowedOrigins = [
+  'http://localhost:5173',  // Local frontend
+  'https://logic-ledger.vercel.app',  // Deployed frontend
+];
+
 app.use(cors({
-  origin: frontendUrl,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

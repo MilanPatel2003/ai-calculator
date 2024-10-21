@@ -5,8 +5,8 @@ import axios, { AxiosError } from 'axios';
 // Add this new import for the logo
 import logo from '/logo.png';
 
-const API_URL = 'https://ai-calculator-ecru.vercel.app'; // Remove the trailing slash
-
+// Use an environment variable for the API URL, defaulting to localhost for development
+const API_URL = import.meta.env.API_URL || 'http://localhost:3000';
 
 const COLORS = [
   '#000000', '#FFFFFF', '#FF3B30', '#FF2D55', 
