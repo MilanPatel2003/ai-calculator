@@ -82,6 +82,12 @@ const resizeImage = (base64Str: string, maxWidth = 1024, maxHeight = 1024): Prom
     }
   })
 }
+type ApiResult = {
+  expr: string;
+  result: string;
+};
+
+type ResultState = ApiResult | { user_friendly_output: string };
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -89,8 +95,9 @@ export default function App() {
   const [color, setColor] = useState<string>(COLORS[0]);
   const [tool, setTool] = useState<Tool>('pen');
   const [lineWidth, setLineWidth] = useState<number>(2);
-  const [result, setResult] = useState<string | { user_friendly_output: string }>('');
+  // const [result, setResult] = useState<string | { user_friendly_output: string }>('');
   const [darkMode, setDarkMode] = useState<boolean>(true);
+  const [result, setResult] = useState<ResultState | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -157,7 +164,7 @@ export default function App() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
-    setResult('');
+    setResult(null);
   };
 
   const toggleDarkMode = () => {
@@ -165,6 +172,32 @@ export default function App() {
     resetCanvas();
   };
 
+  // const calculateResult = async () => {
+  //   const canvas = canvasRef.current;
+  //   if (canvas) {
+  //     try {
+  //       let imageData = canvas.toDataURL('image/png');
+  //       imageData = await resizeImage(imageData);
+  //       const base64Data = imageData.split(',')[1];
+        
+  //       const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });        
+  //       if (typeof response.data.result === 'string') {
+  //         setResult(response.data.result);
+  //       } else {
+  //         setResult(response.data.result);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error analyzing image:', error);
+  //       if (error instanceof AxiosError) {
+  //         setResult(`Error analyzing image: ${error.response?.data?.error || error.message}`);
+  //       } else if (error instanceof Error) {
+  //         setResult(`Error analyzing image: ${error.message}`);
+  //       } else {
+  //         setResult('An unknown error occurred');
+  //       }
+  //     }
+  //   }
+  // };
   const calculateResult = async () => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -173,25 +206,27 @@ export default function App() {
         imageData = await resizeImage(imageData);
         const base64Data = imageData.split(',')[1];
         
-        const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });        
-        if (typeof response.data.result === 'string') {
-          setResult(response.data.result);
+        const response = await axios.post(`${API_URL}/analyze`, { image: base64Data });
+        
+        // Check if the response contains results
+        if (response.data.result && response.data.result.length > 0) {
+          const resultData = response.data.result[0]; // Get the first result
+          setResult(resultData); // Set the result directly
         } else {
-          setResult(response.data.result);
+          setResult({ user_friendly_output: 'No results found.' });
         }
       } catch (error) {
         console.error('Error analyzing image:', error);
         if (error instanceof AxiosError) {
-          setResult(`Error analyzing image: ${error.response?.data?.error || error.message}`);
+          setResult({ user_friendly_output: `Error analyzing image: ${error.response?.data?.error || error.message}` });
         } else if (error instanceof Error) {
-          setResult(`Error analyzing image: ${error.message}`);
+          setResult({ user_friendly_output: `Error analyzing image: ${error.message}` });
         } else {
-          setResult('An unknown error occurred');
+          setResult({ user_friendly_output: 'An unknown error occurred' });
         }
       }
     }
   };
-
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const touch = e.touches[0];
@@ -287,14 +322,14 @@ export default function App() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         />
-        {result && (
-          <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
-            <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Result:</h2>
-            <p className="text-base sm:text-lg">
-              {typeof result === 'string' ? result : result.user_friendly_output}
-            </p>
-          </div>
-        )}
+{result && (
+  <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'} p-2 sm:p-4 rounded shadow-md max-w-xs sm:max-w-md`}>
+    <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Result:</h2>
+    <p className="text-base sm:text-lg">
+      {'expr' in result ? `${result.expr}: ${result.result}` : result.user_friendly_output}
+    </p>
+  </div>
+)}
       </div>
     </div>
   );
