@@ -14,6 +14,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',  // Local frontend
   'https://logic-ledger.vercel.app',  // Deployed frontend
+  'https://ai-calculator-frontend-ocd607otv-milan-patels-projects-5c714e22.vercel.app'
 ];
 
 app.use(cors({
